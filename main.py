@@ -46,7 +46,10 @@ def main():
     request_body = {
         'summary': 'First Google Calendar Event API Call',
         'start' : {'dateTime': '2021-12-14T18:00:00%s' % GMT_OFF},
-        'end' : {'dateTime': '2021-12-14T19:00:00%s' % GMT_OFF}
+        'end' : {'dateTime': '2021-12-14T19:00:00%s' % GMT_OFF},
+        'attendees': [
+            {'email': 'aiden.gu97@gmail.com'}
+        ]
     }
     events_result = service.events().insert(calendarId='primary',
                                             sendUpdates='all', body=request_body).execute()
