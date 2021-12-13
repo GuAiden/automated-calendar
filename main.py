@@ -34,22 +34,27 @@ def main():
 
     service = build('calendar', 'v3', credentials=creds)
 
+    # AEST GMT Offset
+    GMT_OFF = '+11:00'
+
     # Call the Calendar API
     now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
-    print('Getting the upcoming 10 events')
-    events_result = service.events().list(calendarId='primary', timeMin=now,
-                                          maxResults=10, singleEvents=True,
-                                          orderBy='startTime').execute()
-    events = events_result.get('items', [])
+    startTime = datetime.datetime.fromisoformat('2021-12-13 18:00:00')
+    endTime = datetime.datetime.fromisoformat('2021-12-13 19:00:00')
+    
+    print('Creating a new event')
+    request_body = {
+        'summary': 'First Google Calendar Event API Call',
+        'start' : {'dateTime': '2021-12-14T18:00:00%s' % GMT_OFF},
+        'end' : {'dateTime': '2021-12-14T19:00:00%s' % GMT_OFF}
+    }
+    events_result = service.events().insert(calendarId='primary',
+                                            sendUpdates='all', body=request_body).execute()
 
-    if not events:
-        print('No upcoming events found.')
-    for event in events:
-        start = event['start'].get('dateTime', event['start'].get('date'))
-        if 'summary' in event:
-            print(start, event['summary'])
-        else:
-            print(f"No summary found for event {event['id']}")
+    if not events_result:
+        print('Request failed')
+    else:
+        print(events_result)
 
 
 if __name__ == '__main__':
