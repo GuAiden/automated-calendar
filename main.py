@@ -5,6 +5,9 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
+from lib.sheets import readSheetRange, processSheetRange
+from lib.calendar import createRequestBody, sendCalendarInvites
+from lib.automation import getRandomNames
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/calendar',
@@ -33,32 +36,12 @@ def main():
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
 
-    service = build('calendar', 'v3', credentials=creds)
-
-    # AEST GMT Offset
-    GMT_OFF = '+11:00'
-
-    # Call the Calendar API
-    now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
-    startTime = datetime.datetime.fromisoformat('2021-12-13 18:00:00')
-    endTime = datetime.datetime.fromisoformat('2021-12-13 19:00:00')
+    calendarService = build('calendar', 'v3', credentials=creds)
+    sheetsService = build('sheets', 'v4', credentials=creds)
     
-    print('Creating a new event')
-    request_body = {
-        'summary': 'First Google Calendar Event API Call',
-        'start' : {'dateTime': '2021-12-14T18:00:00%s' % GMT_OFF},
-        'end' : {'dateTime': '2021-12-14T19:00:00%s' % GMT_OFF},
-        'attendees': [
-            {'email': 'aiden.gu97@gmail.com'}
-        ]
-    }
-    events_result = service.events().insert(calendarId='primary',
-                                            sendUpdates='all', body=request_body).execute()
-
-    if not events_result:
-        print('Request failed')
-    else:
-        print(events_result)
+    data = processSheetRange(readSheetRange(sheetsService, '1n4FTevz0Phsjd8dsSR6Yehf6yXdJnlNhnqGpwiQ4k7Y', 'Random Name Generator!A2:A38')['values'])
+    print(getRandomNames(data, 3))
+    
 
 
 if __name__ == '__main__':
